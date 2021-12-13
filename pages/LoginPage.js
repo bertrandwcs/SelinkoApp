@@ -26,12 +26,12 @@ const LoginPage = () => {
       mode: "no-cors",
       headers: {
         accept: "application/json",
-        "X-Selinko-App": "pk_0UXcXJRPNqXPe8qaVVl2",
+        "X-Selinko-App": "<ApiKey>",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        password: "gsfbfshbfn",
-        email: "bertrandcardon@hotmail.com",
+        password: "<PASSWORD>",
+        email: "<EMAIL>",
       }),
     })
     .then((response) => {
