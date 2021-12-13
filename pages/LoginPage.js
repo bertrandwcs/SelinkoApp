@@ -9,38 +9,42 @@ import {
   Image,
 } from "react-native";
 import { useNavigate } from "react-router-native";
+import { useDispatch } from "react-redux";
+import { getUser } from "../redux/actions/user.action";
 
 const LoginPage = () => {
+  const dispatch = useDispatch();
   let navigate = useNavigate();
   const urlApi = "https://api.staging.genexir.selinko.com";
 
   const [emails, setEmail] = useState("");
   const [passwords, setPassword] = useState("");
 
-  console.log(emails);
-  console.log(passwords);
-
-  /*   const handleClick = () => {
+  const handleClick = () => {
     fetch(`${urlApi}/api/v2/sessions`, {
       method: "POST",
       mode: "no-cors",
       headers: {
         accept: "application/json",
-        "X-Selinko-App": "<ApiKey>",
+        "X-Selinko-App": "<api key>",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        password: "<PASSWORD>",
-        email: "<EMAIL>",
+        password: passwords,
+        email: emails,
       }),
     })
-    .then((response) => {
-      console.log(response);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-  }; */
+      .then(async (response) => {
+        if (response.status === 201) {
+          let responseJson = await response.json();
+          dispatch(getUser(responseJson.data.jwt));
+          navigate("/home");
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <ImageBackground source={image} style={styles.imageBackground}>
@@ -52,23 +56,18 @@ const LoginPage = () => {
           keyboardType="email-address"
           placeholder="E-mail"
           value={emails}
-          onChange={(e) => setEmail(e.target.value)}
+          onChangeText={(text) => setEmail(text)}
         />
         <TextInput
           style={styles.input}
           secureTextEntry
           placeholder="Password"
           value={passwords}
-          onChange={(e) => setPassword(e.target.value)}
+          onChangeText={(text) => setPassword(text)}
         />
         <View>
           <TouchableOpacity style={styles.button}>
-            <Text
-              style={styles.buttonText}
-              onPress={() => {
-                navigate("/home");
-              }}
-            >
+            <Text style={styles.buttonText} onPress={handleClick}>
               Login
             </Text>
           </TouchableOpacity>

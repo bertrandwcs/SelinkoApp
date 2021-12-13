@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -8,14 +8,59 @@ import {
   Pressable,
 } from "react-native";
 import { useNavigate } from "react-router-native";
+import { useSelector } from "react-redux";
+import InfoProduct from "./components/InfoProduct";
+import { isEmpty } from "../utils/isEmpty";
 
 const HomePage = () => {
+  const [infoProduct, setInfoProduct] = useState({});
+
+  const urlApi = "https://api.staging.genexir.selinko.com";
+  const jwt = useSelector((state) => state.userReducer);
   let navigate = useNavigate();
+
+  const handleNfcButton = () => {
+    fetch(`${urlApi}/api/v2/authentication`, {
+      mode: "no-cors",
+      method: "POST",
+      body: JSON.stringify({
+        short_url: "https://api.staging.genexir.selinko.com/_g6XQ0fN07tD-95y",
+        location: { lng: 2.3847, lat: 1.34848 },
+      }),
+      headers: {
+        Accept: "application/json",
+        Authorization: jwt,
+        "Content-Type": "application/json",
+        "X-Selinko-App": "<api key>",
+      },
+    })
+      .then(async (response) => {
+        if (response.status === 200) {
+          let responseJson = await response.json();
+          setInfoProduct(responseJson);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <View style={styles.container}>
       <Image source={logoImage} style={styles.logoImage} />
-      <Image source={logoNfc} style={styles.logoNfc} />
+
+      {isEmpty(infoProduct) ? (
+        <Pressable onPress={handleNfcButton} style={styles.imagePressable}>
+          <Image
+            source={logoNfc}
+            onPress={handleNfcButton}
+            style={styles.logoNfc}
+          />
+        </Pressable>
+      ) : (
+        <InfoProduct data={infoProduct} />
+      )}
+
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText} onPress={() => navigate("/")}>
           Return
@@ -43,10 +88,16 @@ const styles = StyleSheet.create({
     height: "13%",
     width: "90%",
   },
-  logoNfc: {
+  imagePressable: {
     height: 300,
     width: "80%",
+    alignItems: "center",
+  },
+  logoNfc: {
+    height: 300,
+    width: "100%",
     top: 100,
+    left: 7,
   },
   text: {
     color: "black",
@@ -55,7 +106,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   button: {
-    top: 200,
+    top: 130,
     backgroundColor: "#333333",
     padding: 15,
     width: 100,
